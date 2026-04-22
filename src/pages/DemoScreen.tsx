@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { SCENARIOS, ScenarioId } from '../types';
 import InvoiceDemo from './demos/InvoiceDemo';
 import ClassifySplitDemo from './demos/ClassifySplitDemo';
@@ -24,33 +24,25 @@ const demoComponents: Record<ScenarioId, React.FC> = {
 
 const DemoScreen: React.FC = () => {
   const { scenario } = useParams<{ scenario: string }>();
-  const navigate = useNavigate();
   const scenarioId = scenario as ScenarioId;
   const scenarioInfo = SCENARIOS.find((s) => s.id === scenarioId);
   const DemoComponent = demoComponents[scenarioId];
 
   if (!scenarioInfo || !DemoComponent) {
     return (
-      <div className="demo-screen">
-        <div className="demo-not-found">
-          Scenario not found.
-          <br />
-          <button className="btn-secondary" style={{ marginTop: 16 }} onClick={() => navigate('/features')} type="button">
-            Back to demos
-          </button>
-        </div>
+      <div className="demo-container">
+        <p className="demo-not-found">Demo not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="demo-screen">
+    <div className="demo-container">
       <div className="demo-header">
-        <button className="demo-back" onClick={() => navigate('/features')} type="button" aria-label="Back">←</button>
-        <h1>{scenarioInfo.icon} {scenarioInfo.label}</h1>
+        <h1 className="demo-title">{scenarioInfo.label}</h1>
       </div>
-      <p className="demo-subtitle">{scenarioInfo.description}</p>
-      <div className="demo-body">
+      <p className="demo-description">{scenarioInfo.description}</p>
+      <div className="demo-content">
         <DemoComponent />
       </div>
     </div>

@@ -7,18 +7,15 @@ const FeaturesScreen: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="features-screen">
-      <div className="features-header">
-        <h1>Choose a Demo</h1>
-        <button className="features-close" onClick={() => navigate('/')} type="button" aria-label="Close">✕</button>
-      </div>
-      <div className="features-grid">
+    <div className="features-container">
+      <h1 className="features-title">Demos</h1>
+      <p className="features-subtitle">Select a scenario to explore</p>
+      <div className="features-list">
         {SCENARIOS.map((s) => (
-          <button key={s.id} className="feature-card" onClick={() => navigate(`/demo/${s.id}`)} type="button">
-            <span className="card-icon">{s.icon}</span>
-            <span className="card-label">{s.label}</span>
-            <span className="card-desc">{s.description}</span>
-          </button>
+          <div key={s.id} className="feature-card" onClick={() => navigate(`/demo/${s.id}`)}>
+            <span className="feature-card-label">{s.label}</span>
+            <span className="feature-card-desc">{s.description}</span>
+          </div>
         ))}
       </div>
     </div>

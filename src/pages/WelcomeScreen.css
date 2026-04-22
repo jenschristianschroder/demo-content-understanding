@@ -1,20 +1,56 @@
-.welcome-screen {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 24px; text-align: center;
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
 }
-.welcome-content { max-width: 520px; }
-.welcome-icon { width: 200px; margin-bottom: 32px; }
-.welcome-title { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
-.welcome-subtitle { font-size: 1.1rem; color: #444; line-height: 1.6; margin-bottom: 40px; }
+
+.welcome-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+
+.welcome-subtitle {
+  font-size: 1.25rem;
+  color: #666666;
+  margin-bottom: 48px;
+  line-height: 1.4;
+}
+
 .welcome-cta {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 56px; padding: 14px 48px;
-  background: #0078d4; color: #fff;
-  border-radius: 12px; font-size: 1.15rem; font-weight: 600;
-  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 48px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #000000;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  min-height: 44px;
 }
-.welcome-cta:hover { background: #106ebe; }
+
+.welcome-cta:active {
+  opacity: 0.8;
+}
+
 .welcome-footer {
-  position: fixed; bottom: 24px; left: 0; right: 0;
-  text-align: center; font-size: 0.85rem; color: #999;
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #999999;
 }
