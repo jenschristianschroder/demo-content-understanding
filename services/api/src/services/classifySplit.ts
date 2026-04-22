@@ -48,8 +48,9 @@ const DEFAULT_CATEGORIES: Record<string, { description: string }> = {
 };
 
 let _analyzerReady = false;
+let _analyzerPromise: Promise<string> | null = null;
 
-async function ensureClassifierAnalyzer(): Promise<string> {
+export async function ensureClassifierAnalyzer(): Promise<string> {
   const analyzerId = process.env.CLASSIFY_SPLIT_ANALYZER || DEFAULT_ANALYZER_ID;
 
   // If user specified a custom analyzer, assume it exists
@@ -57,10 +58,17 @@ async function ensureClassifierAnalyzer(): Promise<string> {
     return analyzerId;
   }
 
-  // For the default analyzer, create it if not already done
+  // If already ready, return immediately
   if (_analyzerReady) {
     return analyzerId;
   }
+
+  // Reuse in-flight creation promise to avoid duplicate creation attempts
+  if (_analyzerPromise) {
+    return _analyzerPromise;
+  }
+
+  _analyzerPromise = (async () => {
 
   const client = getClient();
 
@@ -98,10 +106,14 @@ async function ensureClassifierAnalyzer(): Promise<string> {
   } catch (err: any) {
     const detail = err?.response?.bodyAsText || err?.details || '';
     console.error('Failed to create classifier analyzer:', err.message, detail);
+    _analyzerPromise = null; // allow retry
     throw err;
   }
 
   return analyzerId;
+  })();
+
+  return _analyzerPromise;
 }
 
 export async function classifySplitService(file: Express.Multer.File) {
