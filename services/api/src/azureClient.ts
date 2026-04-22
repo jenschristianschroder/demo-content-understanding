@@ -33,7 +33,10 @@ export function getClient(): ContentUnderstandingClient {
  * Only runs once per process lifetime.
  */
 export async function ensureDefaults(): Promise<void> {
-  if (_defaultsConfigured) return;
+  if (_defaultsConfigured) {
+    console.log('ensureDefaults: already configured, skipping.');
+    return;
+  }
 
   const client = getClient();
 
@@ -47,16 +50,22 @@ export async function ensureDefaults(): Promise<void> {
     'text-embedding-3-large': embeddingDeployment,
   };
 
+  console.log('ensureDefaults: configuring model deployments:', JSON.stringify(deployments));
+
   try {
-    console.log('Configuring default model deployments:', deployments);
-    await client.updateDefaults({
+    const result = await client.updateDefaults({
       modelDeployments: { additionalProperties: deployments },
     });
-    console.log('Default model deployments configured successfully.');
+    console.log('ensureDefaults: configured successfully. Result:', JSON.stringify(result));
     _defaultsConfigured = true;
-  } catch (err) {
-    console.warn('Failed to configure default model deployments (may already be set):', (err as Error).message);
-    // Don't throw — defaults may already be configured, or the models might be auto-deployed
-    _defaultsConfigured = true;
+  } catch (err: any) {
+    const body = err?.response?.bodyAsText || '';
+    console.error('ensureDefaults: FAILED to configure model deployments.');
+    console.error('  Error:', err.message);
+    console.error('  Code:', err.code);
+    console.error('  Status:', err.statusCode);
+    if (body) console.error('  Response body:', body);
+    // Do NOT set _defaultsConfigured so it retries next time
+    throw new Error(`Failed to configure model defaults: ${err.message}`);
   }
 }
