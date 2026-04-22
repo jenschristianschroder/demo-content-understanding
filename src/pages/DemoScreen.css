@@ -1,0 +1,22 @@
+.demo-screen {
+  min-height: 100vh; padding: 32px 24px; display: flex; flex-direction: column; align-items: center;
+}
+.demo-header {
+  display: flex; align-items: center; gap: 16px;
+  width: 100%; max-width: 960px; margin-bottom: 8px;
+}
+.demo-back {
+  width: 44px; height: 44px; font-size: 1.3rem; display: flex;
+  align-items: center; justify-content: center; border-radius: 50%;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.demo-back:hover { background: #f0f0f0; }
+.demo-header h1 { font-size: 1.4rem; font-weight: 700; }
+.demo-subtitle {
+  width: 100%; max-width: 960px; color: #555; font-size: 0.95rem;
+  margin-bottom: 24px; padding-left: 60px;
+}
+.demo-body { width: 100%; max-width: 960px; }
+.demo-not-found {
+  text-align: center; padding: 80px 24px; color: #999; font-size: 1.1rem;
+}

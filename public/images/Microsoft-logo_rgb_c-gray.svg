@@ -1,0 +1,11 @@
+<!-- Placeholder: Replace with the actual Microsoft logo PNG from https://github.com/jenschristianschroder/demo-speech-service/blob/main/public/images/Microsoft-logo_rgb_c-gray.png -->
+<!-- Download the real logo and save as Microsoft-logo_rgb_c-gray.png in this directory -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 110">
+  <g fill="#737373">
+    <rect x="0" y="0" width="50" height="50" fill="#f25022"/>
+    <rect x="55" y="0" width="50" height="50" fill="#7fba00"/>
+    <rect x="0" y="55" width="50" height="50" fill="#00a4ef"/>
+    <rect x="55" y="55" width="50" height="50" fill="#ffb900"/>
+    <text x="125" y="75" font-family="Segoe UI, sans-serif" font-size="52" font-weight="300" fill="#737373">Microsoft</text>
+  </g>
+</svg>

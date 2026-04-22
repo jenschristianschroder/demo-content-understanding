@@ -1,0 +1,19 @@
+services:
+  content-understanding-spa:
+    build: .
+    ports:
+      - "3000:80"
+    environment:
+      - API_BACKEND_URL=http://content-understanding-api:3001
+    depends_on:
+      - content-understanding-api
+
+  content-understanding-api:
+    build: ./services/api
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - AZURE_CONTENT_UNDERSTANDING_ENDPOINT=${AZURE_CONTENT_UNDERSTANDING_ENDPOINT}
+      - AZURE_CONTENT_UNDERSTANDING_REGION=${AZURE_CONTENT_UNDERSTANDING_REGION}
+      - CORS_ORIGIN=*

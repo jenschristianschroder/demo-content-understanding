@@ -1,0 +1,90 @@
+/* Global reset & kiosk styles — white background, black text */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%; width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #ffffff; color: #111111;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  -webkit-user-select: none; user-select: none;
+  overscroll-behavior: none;
+}
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit;
+         -webkit-tap-highlight-color: transparent; }
+
+.kiosk-container { max-width: 960px; width: 100%; margin: 0 auto; padding: 0 24px; }
+
+/* Allow text selection in output areas */
+.result-area, .json-panel, .markdown-rendered, .transcript-area {
+  -webkit-user-select: text; user-select: text;
+}
+
+/* Shared button styles */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 12px 32px;
+  background: #0078d4; color: #fff;
+  border-radius: 8px; font-size: 1rem; font-weight: 600;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: #106ebe; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 10px 24px;
+  background: #f3f3f3; color: #111;
+  border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+  border: 1px solid #e0e0e0;
+  transition: background 0.15s;
+}
+.btn-secondary:hover { background: #e5e5e5; }
+
+/* Tab bar */
+.tab-bar { display: flex; gap: 0; border-bottom: 2px solid #e0e0e0; margin-bottom: 16px; }
+.tab-bar button {
+  padding: 10px 20px; font-size: 0.9rem; font-weight: 500;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: border-color 0.15s, color 0.15s;
+  color: #666;
+}
+.tab-bar button.active { border-bottom-color: #0078d4; color: #0078d4; }
+
+/* JSON panel */
+.json-panel {
+  background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px;
+  padding: 16px; overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+}
+
+/* Confidence badge */
+.confidence-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 12px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.confidence-high   { background: #e6f4ea; color: #1e7e34; }
+.confidence-medium { background: #fff8e1; color: #b8860b; }
+.confidence-low    { background: #fce4ec; color: #c62828; }
+
+/* Loading spinner */
+.spinner {
+  display: inline-block; width: 20px; height: 20px;
+  border: 3px solid #e0e0e0; border-top-color: #0078d4; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* File drop zone */
+.drop-zone {
+  border: 2px dashed #ccc; border-radius: 12px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color: #666;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: #0078d4; background: #f0f7ff;
+}
+.drop-zone .file-name { color: #111; font-weight: 600; margin-top: 8px; }
