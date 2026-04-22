@@ -36,7 +36,7 @@ export const SCENARIOS: ScenarioInfo[] = [
     description: 'Classify and split mixed-document bundles into individual documents',
     icon: '📂',
     acceptedFormats: '.pdf',
-    sampleFile: '/samples/mixed-documents.pdf',
+    sampleFile: '/samples/mixed_financial_docs.pdf',
   },
   {
     id: 'image-summary',
