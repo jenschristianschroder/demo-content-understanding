@@ -18,6 +18,12 @@ param imageTag string = 'latest'
 @description('Azure Content Understanding endpoint URL')
 param contentUnderstandingEndpoint string
 
+@description('Completion model deployment name in Foundry')
+param completionModelDeployment string = ''
+
+@description('Embedding model deployment name in Foundry')
+param embeddingModelDeployment string = ''
+
 // --- Modules ---
 
 module acr 'modules/acr.bicep' = {
@@ -57,6 +63,8 @@ module api 'modules/aca-api.bicep' = {
     acrLoginServer: acr.outputs.acrLoginServer
     imageTag: imageTag
     contentUnderstandingEndpoint: contentUnderstandingEndpoint
+    completionModelDeployment: completionModelDeployment
+    embeddingModelDeployment: embeddingModelDeployment
   }
 }
 
