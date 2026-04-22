@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 import { getClient } from '../azureClient.js';
-import type { DocumentContent, ContentAnalyzerConfig, ContentAnalyzer } from '@azure/ai-content-understanding';
+import type { DocumentContent } from '@azure/ai-content-understanding';
 
 const DEFAULT_ANALYZER_ID = 'demo-document-classifier';
 
@@ -75,24 +75,27 @@ async function ensureClassifierAnalyzer(): Promise<string> {
 
   console.log(`Creating classifier analyzer '${analyzerId}'...`);
 
-  const config: ContentAnalyzerConfig = {
-    returnDetails: true,
-    enableSegment: true,
-    contentCategories: DEFAULT_CATEGORIES,
-  };
-
-  const classifier: ContentAnalyzer = {
+  const analyzerDef = {
     baseAnalyzerId: 'prebuilt-document',
     description: 'Demo classifier for document categorisation and splitting',
-    config,
+    config: {
+      returnDetails: true,
+      enableSegment: true,
+      contentCategories: DEFAULT_CATEGORIES,
+    },
     models: { completion: process.env.CLASSIFIER_MODEL_DEPLOYMENT || 'gpt-4.1' },
-  } as unknown as ContentAnalyzer;
+  };
 
-  const poller = client.createAnalyzer(analyzerId, classifier);
-  await poller.pollUntilDone();
+  try {
+    const poller = client.createAnalyzer(analyzerId, analyzerDef as any);
+    await poller.pollUntilDone();
+    _analyzerReady = true;
+    console.log(`Classifier analyzer '${analyzerId}' created.`);
+  } catch (err) {
+    console.error('Failed to create classifier analyzer:', err);
+    throw err;
+  }
 
-  _analyzerReady = true;
-  console.log(`Classifier analyzer '${analyzerId}' created.`);
   return analyzerId;
 }
 
