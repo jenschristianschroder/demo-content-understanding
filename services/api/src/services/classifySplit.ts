@@ -6,7 +6,7 @@
 import { getClient, ensureDefaults } from '../azureClient.js';
 import type { DocumentContent } from '@azure/ai-content-understanding';
 
-const DEFAULT_ANALYZER_ID = 'demo-document-classifier';
+const DEFAULT_ANALYZER_ID = 'demo_document_classifier';
 
 const DEFAULT_CATEGORIES: Record<string, { description: string }> = {
   Invoice: {
