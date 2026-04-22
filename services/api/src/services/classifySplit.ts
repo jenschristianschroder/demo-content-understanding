@@ -86,7 +86,7 @@ async function ensureClassifierAnalyzer(): Promise<string> {
       enableSegment: true,
       contentCategories: DEFAULT_CATEGORIES,
     },
-    models: { completion: process.env.CLASSIFIER_MODEL_DEPLOYMENT || 'gpt-5.2' },
+    models: { completion: process.env.CLASSIFIER_MODEL_DEPLOYMENT || 'gpt-4.1' },
   };
 
   try {
