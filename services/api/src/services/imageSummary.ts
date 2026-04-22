@@ -1,30 +1,42 @@
 // ---------------------------------------------------------------------------
 // Image / chart summary service
-// TODO: Replace mock with Azure Content Understanding API call
 // ---------------------------------------------------------------------------
 
-export async function imageSummaryService(_file: Express.Multer.File) {
-  // TODO: Call analyzeContent('prebuilt-image-summary', file.buffer, file.mimetype)
+import { getClient } from '../azureClient.js';
+import type { DocumentContent, ContentFieldUnion } from '@azure/ai-content-understanding';
+
+export async function imageSummaryService(file: Express.Multer.File) {
+  const client = getClient();
+  const poller = client.analyzeBinary('prebuilt-imageSearch', file.buffer, file.mimetype);
+  const result = await poller.pollUntilDone();
+
+  const content = result.contents?.[0];
+  const summaryField = content?.fields?.['Summary'];
+  const summary = summaryField && typeof summaryField.value === 'string'
+    ? summaryField.value
+    : (content?.markdown ?? '');
+
+  // Build insights from any extracted fields
+  const insights: { label: string; value: string }[] = [];
+  if (content?.fields) {
+    for (const [key, field] of Object.entries(content.fields)) {
+      if (key === 'Summary') continue;
+      const f = field as ContentFieldUnion;
+      let value = '';
+      if (typeof f.value === 'string') value = f.value;
+      else if (typeof f.value === 'number') value = String(f.value);
+      if (value) insights.push({ label: key, value });
+    }
+  }
+
+  // If no structured fields, add the mime type as context
+  if (insights.length === 0 && content) {
+    insights.push({ label: 'Content Type', value: (content as DocumentContent).mimeType ?? file.mimetype });
+  }
 
   return {
-    summary: 'This bar chart shows quarterly revenue for FY2025. Q1 generated $2.4M, Q2 rose to $3.1M (+29%), Q3 peaked at $3.8M, and Q4 projections indicate $4.2M. The overall trend shows consistent quarter-over-quarter growth averaging 21%.',
-    insights: [
-      { label: 'Chart Type', value: 'Bar Chart' },
-      { label: 'Time Period', value: 'FY2025 Q1–Q4' },
-      { label: 'Peak Value', value: '$3.8M (Q3)' },
-      { label: 'Growth Trend', value: '+21% avg QoQ' },
-      { label: 'Data Series', value: 'Revenue' },
-      { label: 'Currency', value: 'USD' },
-    ],
-    rawJson: {
-      _note: 'Mock data — wire Azure Content Understanding image analysis.',
-      chartType: 'bar',
-      dataPoints: [
-        { quarter: 'Q1', value: 2400000 },
-        { quarter: 'Q2', value: 3100000 },
-        { quarter: 'Q3', value: 3800000 },
-        { quarter: 'Q4', value: 4200000 },
-      ],
-    },
+    summary,
+    insights,
+    rawJson: result as unknown as Record<string, unknown>,
   };
 }

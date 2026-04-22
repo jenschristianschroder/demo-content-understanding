@@ -1,26 +1,64 @@
 // ---------------------------------------------------------------------------
 // Video clip analysis service
-// TODO: Replace mock with Azure Content Understanding API call
 // ---------------------------------------------------------------------------
 
-export async function videoAnalysisService(_file: Express.Multer.File) {
-  // TODO: Call analyzeContent('prebuilt-video-analysis', file.buffer, file.mimetype)
+import { getClient } from '../azureClient.js';
+import type { AudioVisualContent } from '@azure/ai-content-understanding';
+
+export async function videoAnalysisService(file: Express.Multer.File) {
+  const client = getClient();
+  const poller = client.analyzeBinary('prebuilt-videoSearch', file.buffer, file.mimetype);
+  const result = await poller.pollUntilDone();
+
+  // Video may return multiple content segments
+  const contents = (result.contents ?? []) as AudioVisualContent[];
+
+  // Build chapters from each segment/content item
+  const chapters: { title: string; startTime: number; endTime: number; summary: string }[] = [];
+  let transcript = '';
+  let overallSummary = '';
+  let duration = 0;
+
+  for (const segment of contents) {
+    const startSec = (segment.startTimeMs ?? 0) / 1000;
+    const endSec = (segment.endTimeMs ?? 0) / 1000;
+
+    // Use the Summary field or markdown as the chapter summary
+    const summaryField = segment.fields?.['Summary'];
+    const segSummary = summaryField && typeof summaryField.value === 'string'
+      ? summaryField.value
+      : (segment.markdown ?? '');
+
+    chapters.push({
+      title: `Segment ${chapters.length + 1}`,
+      startTime: startSec,
+      endTime: endSec,
+      summary: segSummary,
+    });
+
+    // Accumulate transcript from transcript phrases
+    if (segment.transcriptPhrases) {
+      for (const phrase of segment.transcriptPhrases) {
+        transcript += (transcript ? ' ' : '') + (phrase.text ?? '');
+      }
+    } else if (segment.markdown) {
+      transcript += (transcript ? '\n\n' : '') + segment.markdown;
+    }
+
+    if (endSec > duration) duration = endSec;
+    if (!overallSummary && segSummary) overallSummary = segSummary;
+  }
+
+  // If only one segment, use its summary directly
+  if (contents.length === 1) {
+    overallSummary = chapters[0]?.summary ?? '';
+  }
 
   return {
-    transcript: 'Welcome to this overview of Azure AI Content Understanding. In this demo, we\'ll show you how a single service can process documents, images, audio, and video. First, let\'s look at document extraction. Here we upload an invoice and the service returns structured JSON with vendor details, line items, and totals. Next, we\'ll demonstrate classification. When you have a bundle of mixed documents, Content Understanding can split them and classify each section. Now let\'s move on to audio. The service transcribes calls, identifies speakers, and generates summaries. Finally, video analysis. The service creates chapters, key moments, and a full transcript. That\'s Azure AI Content Understanding — one service for all your content.',
-    chapters: [
-      { title: 'Introduction', startTime: 0, endTime: 15, summary: 'Overview of Azure AI Content Understanding capabilities and what the demo will cover.' },
-      { title: 'Document Extraction', startTime: 16, endTime: 45, summary: 'Demonstrates invoice upload and structured JSON extraction including vendor details, line items, and totals.' },
-      { title: 'Document Classification', startTime: 46, endTime: 75, summary: 'Shows how mixed document bundles are split and classified into individual document types.' },
-      { title: 'Audio Analysis', startTime: 76, endTime: 105, summary: 'Demonstrates call transcription, speaker identification, and automated summary generation.' },
-      { title: 'Video Analysis & Wrap-up', startTime: 106, endTime: 130, summary: 'Shows video chapter detection and transcript generation. Concludes with a summary of the unified service.' },
-    ],
-    summary: 'A 2-minute overview demo of Azure AI Content Understanding covering four key capabilities: document extraction (invoices to JSON), document classification and splitting, audio call analysis with speaker diarisation, and video analysis with chapter detection. The demo emphasises the unified single-service approach.',
-    duration: 130,
-    rawJson: {
-      _note: 'Mock data — wire Azure Content Understanding video analysis.',
-      chapterCount: 5,
-      keyMoments: ['Invoice extraction', 'Classification demo', 'Speaker identification', 'Chapter detection'],
-    },
+    transcript,
+    chapters,
+    summary: overallSummary,
+    duration,
+    rawJson: result as unknown as Record<string, unknown>,
   };
 }
