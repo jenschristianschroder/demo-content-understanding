@@ -17,9 +17,22 @@ const upload = multer({
 const router = Router();
 
 function handleError(res: Response, err: unknown) {
-  console.error(err);
-  const message = err instanceof Error ? err.message : 'Internal server error';
-  res.status(500).json({ error: message });
+  console.error('API error:', err);
+  let message = 'Internal server error';
+  let status = 500;
+  if (err instanceof Error) {
+    message = err.message;
+    // Surface Azure SDK RestError details
+    const restErr = err as any;
+    if (restErr.statusCode) status = restErr.statusCode;
+    if (restErr.details) {
+      console.error('Azure error details:', JSON.stringify(restErr.details, null, 2));
+    }
+    if (restErr.code) {
+      message = `${restErr.code}: ${message}`;
+    }
+  }
+  res.status(status).json({ error: message });
 }
 
 function requireFile(req: Request, res: Response): Express.Multer.File | null {
