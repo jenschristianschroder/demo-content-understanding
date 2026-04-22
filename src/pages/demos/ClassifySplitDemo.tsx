@@ -7,12 +7,6 @@ import './demos.css';
 
 const scenario = SCENARIOS.find((s) => s.id === 'classify-split')!;
 
-function confidenceClass(c: number) {
-  if (c >= 0.9) return 'confidence-high';
-  if (c >= 0.7) return 'confidence-medium';
-  return 'confidence-low';
-}
-
 const ClassifySplitDemo: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -70,9 +64,6 @@ const ClassifySplitDemo: React.FC = () => {
                       <div className="section-class">{s.classification}</div>
                       <div className="section-pages">Pages {s.pageRange[0]}–{s.pageRange[1]}</div>
                     </div>
-                    <span className={`confidence-badge ${confidenceClass(s.confidence)}`}>
-                      {(s.confidence * 100).toFixed(0)}%
-                    </span>
                   </div>
                 ))}
               </div>

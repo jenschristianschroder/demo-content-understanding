@@ -20,6 +20,17 @@ const DEFAULT_CATEGORIES: Record<string, { description: string }> = {
       'Proof-of-purchase documents from retail or dining establishments ' +
       'showing items bought, prices, taxes, and totals.',
   },
+  Bank_Statement: {
+    description:
+      'Official statements issued by banks summarising account activity ' +
+      'over a period, including deposits, withdrawals, fees, and balances.',
+  },
+  Loan_Application: {
+    description:
+      'Forms submitted by individuals or businesses to request funding, ' +
+      'typically including personal details, financial history, loan amount, ' +
+      'purpose, and supporting documentation.',
+  },
   Contract: {
     description:
       'Legal agreements between parties defining terms, obligations, ' +
@@ -72,16 +83,7 @@ export async function ensureClassifierAnalyzer(): Promise<string> {
 
   const client = getClient();
 
-  // Check if the analyzer already exists
-  try {
-    await client.getAnalyzer(analyzerId);
-    _analyzerReady = true;
-    return analyzerId;
-  } catch {
-    // Analyzer doesn't exist, create it
-  }
-
-  console.log(`Creating classifier analyzer '${analyzerId}'...`);
+  console.log(`Creating/updating classifier analyzer '${analyzerId}'...`);
 
   // Ensure model deployment defaults are configured first
   await ensureDefaults();
@@ -99,7 +101,7 @@ export async function ensureClassifierAnalyzer(): Promise<string> {
 
   try {
     console.log('Analyzer definition:', JSON.stringify(analyzerDef, null, 2));
-    const poller = client.createAnalyzer(analyzerId, analyzerDef as any);
+    const poller = client.createAnalyzer(analyzerId, analyzerDef as any, { allowReplace: true });
     await poller.pollUntilDone();
     _analyzerReady = true;
     console.log(`Classifier analyzer '${analyzerId}' created.`);
@@ -135,7 +137,6 @@ export async function classifySplitService(file: Express.Multer.File) {
   const sections = (content as any)?.segments?.map((seg: any, i: number) => ({
     index: i,
     classification: (seg.category ?? 'Unknown').replace(/_/g, ' '),
-    confidence: seg.confidence ?? 0.0,
     pageRange: [seg.startPageNumber ?? 0, seg.endPageNumber ?? 0] as [number, number],
   })) ?? [];
 
