@@ -126,7 +126,6 @@ export interface InvoiceResult {
 export interface DocumentSection {
   index: number;
   classification: string;
-  confidence: number;
   pageRange: [number, number];
 }
 export interface ClassifySplitResult {
