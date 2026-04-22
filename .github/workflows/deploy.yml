@@ -54,6 +54,7 @@ jobs:
           template: infra/main.bicep
           parameters: >-
             imageTag=${{ github.sha }}
+            contentUnderstandingEndpoint=${{ secrets.AZURE_CONTENT_UNDERSTANDING_ENDPOINT }}
             ${{ secrets.AZURE_AI_SERVICES_RESOURCE_ID != '' && format('aiServicesResourceId={0}', secrets.AZURE_AI_SERVICES_RESOURCE_ID) || '' }}
           failOnStdErr: false
 
