@@ -15,6 +15,9 @@ param aiServicesResourceId string
 @description('Container image tag')
 param imageTag string = 'latest'
 
+@description('Azure Content Understanding endpoint URL')
+param contentUnderstandingEndpoint string
+
 // --- Modules ---
 
 module acr 'modules/acr.bicep' = {
@@ -53,6 +56,7 @@ module api 'modules/aca-api.bicep' = {
     identityClientId: identity.outputs.identityClientId
     acrLoginServer: acr.outputs.acrLoginServer
     imageTag: imageTag
+    contentUnderstandingEndpoint: contentUnderstandingEndpoint
   }
 }
 

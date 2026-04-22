@@ -19,6 +19,9 @@ param acrLoginServer string
 @description('Image tag')
 param imageTag string
 
+@description('Azure Content Understanding endpoint URL')
+param contentUnderstandingEndpoint string
+
 resource api 'Microsoft.App/containerApps@2023-05-01' = {
   name: '${appName}-api'
   location: location
@@ -51,8 +54,7 @@ resource api 'Microsoft.App/containerApps@2023-05-01' = {
           env: [
             { name: 'PORT', value: '3001' }
             { name: 'AZURE_CLIENT_ID', value: identityClientId }
-            { name: 'AZURE_CONTENT_UNDERSTANDING_ENDPOINT', value: '' }  // Set after deployment
-            { name: 'AZURE_CONTENT_UNDERSTANDING_REGION', value: '' }
+            { name: 'AZURE_CONTENT_UNDERSTANDING_ENDPOINT', value: contentUnderstandingEndpoint }
             { name: 'CORS_ORIGIN', value: '*' }
           ]
           probes: [
