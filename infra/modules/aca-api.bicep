@@ -33,6 +33,7 @@ resource api 'Microsoft.App/containerApps@2023-05-01' = {
         external: false
         targetPort: 3001
         transport: 'http'
+        allowInsecure: true
       }
       registries: [
         {
