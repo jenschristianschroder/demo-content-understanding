@@ -55,6 +55,8 @@ jobs:
           parameters: >-
             imageTag=${{ github.sha }}
             contentUnderstandingEndpoint=${{ secrets.AZURE_CONTENT_UNDERSTANDING_ENDPOINT }}
+            completionModelDeployment=${{ secrets.COMPLETION_MODEL_DEPLOYMENT }}
+            embeddingModelDeployment=${{ secrets.EMBEDDING_MODEL_DEPLOYMENT }}
             ${{ secrets.AZURE_AI_SERVICES_RESOURCE_ID != '' && format('aiServicesResourceId={0}', secrets.AZURE_AI_SERVICES_RESOURCE_ID) || '' }}
           failOnStdErr: false
 
