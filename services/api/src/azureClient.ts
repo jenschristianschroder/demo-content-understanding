@@ -4,11 +4,26 @@
 
 import { DefaultAzureCredential } from '@azure/identity';
 import { ContentUnderstandingClient } from '@azure/ai-content-understanding';
+import type { PipelinePolicy } from '@azure/core-rest-pipeline';
 
 const ENDPOINT = process.env.AZURE_CONTENT_UNDERSTANDING_ENDPOINT || '';
 
 let _client: ContentUnderstandingClient | null = null;
 let _defaultsConfigured = false;
+
+/** Pipeline policy that logs response bodies on error status codes */
+const errorBodyLoggingPolicy: PipelinePolicy = {
+  name: 'errorBodyLoggingPolicy',
+  async sendRequest(request, next) {
+    const response = await next(request);
+    if (response.status >= 400) {
+      console.error(`[HTTP ${response.status}] ${request.method} ${request.url}`);
+      console.error('  Request body:', request.body ? String(request.body).substring(0, 2000) : '(none)');
+      console.error('  Response body:', response.bodyAsText?.substring(0, 2000) || '(none)');
+    }
+    return response;
+  },
+};
 
 export function getEndpoint(): string {
   return ENDPOINT;
@@ -23,6 +38,7 @@ export function getClient(): ContentUnderstandingClient {
       );
     }
     _client = new ContentUnderstandingClient(ENDPOINT, new DefaultAzureCredential());
+    _client.pipeline.addPolicy(errorBodyLoggingPolicy);
   }
   return _client;
 }
