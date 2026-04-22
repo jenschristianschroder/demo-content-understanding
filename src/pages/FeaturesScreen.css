@@ -1,29 +1,53 @@
-.features-screen {
-  min-height: 100vh; padding: 48px 24px 24px;
-  display: flex; flex-direction: column; align-items: center;
+.features-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
 }
-.features-header {
-  display: flex; align-items: center; justify-content: space-between;
-  width: 100%; max-width: 900px; margin-bottom: 32px;
+
+.features-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #111111;
+  margin-bottom: 8px;
 }
-.features-header h1 { font-size: 1.5rem; font-weight: 700; }
-.features-close {
-  width: 44px; height: 44px; font-size: 1.5rem; display: flex;
-  align-items: center; justify-content: center; border-radius: 50%;
-  transition: background 0.15s;
+
+.features-subtitle {
+  font-size: 1.125rem;
+  color: #666666;
+  margin-bottom: 32px;
 }
-.features-close:hover { background: #f0f0f0; }
-.features-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px; width: 100%; max-width: 900px;
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
 .feature-card {
-  display: flex; flex-direction: column; align-items: flex-start;
-  padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;
-  transition: box-shadow 0.15s, border-color 0.15s; text-align: left;
-  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px;
+  border: 1.5px solid #222222;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 80px;
 }
-.feature-card:hover { border-color: #0078d4; box-shadow: 0 2px 12px rgba(0,120,212,0.10); }
-.feature-card .card-icon { font-size: 1.6rem; margin-bottom: 8px; }
-.feature-card .card-label { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
-.feature-card .card-desc { font-size: 0.85rem; color: #555; line-height: 1.4; }
+
+.feature-card:active {
+  background: #fafafa;
+}
+
+.feature-card-label {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111111;
+  margin-bottom: 4px;
+}
+
+.feature-card-desc {
+  font-size: 0.875rem;
+  color: #666666;
+  line-height: 1.4;
+}

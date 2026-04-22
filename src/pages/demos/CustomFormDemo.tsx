@@ -31,7 +31,7 @@ const CustomFormDemo: React.FC = () => {
 
   return (
     <div className="demo-panel">
-      <div style={{ background: '#f0f7ff', padding: 16, borderRadius: 8, fontSize: '0.9rem', color: '#333', marginBottom: 8 }}>
+      <div className="scenario-context">
         <strong>Scenario:</strong> A field service company receives paper-based service request forms.
         This custom analyzer extracts key fields like customer name, service type, priority, location, and description.
       </div>
