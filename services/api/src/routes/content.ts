@@ -28,6 +28,9 @@ function handleError(res: Response, err: unknown) {
     if (restErr.details) {
       console.error('Azure error details:', JSON.stringify(restErr.details, null, 2));
     }
+    if (restErr.response?.bodyAsText) {
+      console.error('Azure response body:', restErr.response.bodyAsText);
+    }
     if (restErr.code) {
       message = `${restErr.code}: ${message}`;
     }

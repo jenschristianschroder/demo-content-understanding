@@ -3,7 +3,7 @@
 // Uses Azure Content Understanding SDK with a classifier analyzer
 // ---------------------------------------------------------------------------
 
-import { getClient } from '../azureClient.js';
+import { getClient, ensureDefaults } from '../azureClient.js';
 import type { DocumentContent } from '@azure/ai-content-understanding';
 
 const DEFAULT_ANALYZER_ID = 'demo-document-classifier';
@@ -75,6 +75,9 @@ async function ensureClassifierAnalyzer(): Promise<string> {
 
   console.log(`Creating classifier analyzer '${analyzerId}'...`);
 
+  // Ensure model deployment defaults are configured first
+  await ensureDefaults();
+
   const analyzerDef = {
     baseAnalyzerId: 'prebuilt-document',
     description: 'Demo classifier for document categorisation and splitting',
@@ -83,16 +86,18 @@ async function ensureClassifierAnalyzer(): Promise<string> {
       enableSegment: true,
       contentCategories: DEFAULT_CATEGORIES,
     },
-    models: { completion: process.env.CLASSIFIER_MODEL_DEPLOYMENT || 'gpt-4.1' },
+    models: { completion: process.env.CLASSIFIER_MODEL_DEPLOYMENT || 'gpt-5.2' },
   };
 
   try {
+    console.log('Analyzer definition:', JSON.stringify(analyzerDef, null, 2));
     const poller = client.createAnalyzer(analyzerId, analyzerDef as any);
     await poller.pollUntilDone();
     _analyzerReady = true;
     console.log(`Classifier analyzer '${analyzerId}' created.`);
-  } catch (err) {
-    console.error('Failed to create classifier analyzer:', err);
+  } catch (err: any) {
+    const detail = err?.response?.bodyAsText || err?.details || '';
+    console.error('Failed to create classifier analyzer:', err.message, detail);
     throw err;
   }
 
