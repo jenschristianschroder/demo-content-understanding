@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.mjs',
+  import.meta.url,
+).toString();
 
 interface SamplePreviewModalProps {
   sampleFile: string;
@@ -8,14 +14,55 @@ interface SamplePreviewModalProps {
 const IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.tiff'];
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm'];
 const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.ogg'];
+const PDF_EXTENSIONS = ['.pdf'];
 
-function getFileType(path: string): 'image' | 'video' | 'audio' | 'other' {
+function getFileType(path: string): 'image' | 'video' | 'audio' | 'pdf' | 'other' {
   const lower = path.toLowerCase();
   if (IMAGE_EXTENSIONS.some((ext) => lower.endsWith(ext))) return 'image';
   if (VIDEO_EXTENSIONS.some((ext) => lower.endsWith(ext))) return 'video';
   if (AUDIO_EXTENSIONS.some((ext) => lower.endsWith(ext))) return 'audio';
+  if (PDF_EXTENSIONS.some((ext) => lower.endsWith(ext))) return 'pdf';
   return 'other';
 }
+
+const PdfViewer: React.FC<{ url: string }> = ({ url }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pageCount, setPageCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const renderPdf = async () => {
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      if (cancelled) return;
+      setPageCount(pdf.numPages);
+      const container = containerRef.current;
+      if (!container) return;
+      container.innerHTML = '';
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        if (cancelled) break;
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.className = 'pdf-page-canvas';
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d')!;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+      }
+    };
+    renderPdf();
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return (
+    <div className="pdf-viewer-container" ref={containerRef}>
+      {pageCount === 0 && <div className="demo-loading"><span className="spinner" /> Rendering PDF…</div>}
+    </div>
+  );
+};
 
 const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onClose }) => {
   const fileName = sampleFile.split('/').pop() || 'Sample File';
@@ -25,6 +72,8 @@ const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onC
 
   useEffect(() => {
     let revoked = false;
+    // PDFs are loaded directly by PDF.js, no blob needed
+    if (fileType === 'pdf') return;
     fetch(sampleFile)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load sample file');
@@ -40,7 +89,7 @@ const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onC
       revoked = true;
       setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
     };
-  }, [sampleFile]);
+  }, [sampleFile, fileType]);
 
   return (
     <div className="sample-preview-overlay" onClick={onClose}>
@@ -51,7 +100,7 @@ const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onC
         </div>
         <div className="sample-preview-body">
           {error && <div className="demo-error">{error}</div>}
-          {!blobUrl && !error && <div className="demo-loading"><span className="spinner" /> Loading preview…</div>}
+          {fileType !== 'pdf' && !blobUrl && !error && <div className="demo-loading"><span className="spinner" /> Loading preview…</div>}
           {blobUrl && fileType === 'image' && (
             <img src={blobUrl} alt={fileName} className="sample-preview-image" />
           )}
@@ -60,6 +109,9 @@ const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onC
           )}
           {blobUrl && fileType === 'audio' && (
             <audio src={blobUrl} controls className="sample-preview-audio">Your browser does not support audio playback.</audio>
+          )}
+          {fileType === 'pdf' && (
+            <PdfViewer url={sampleFile} />
           )}
           {blobUrl && fileType === 'other' && (
             <iframe src={blobUrl} title={fileName} className="sample-preview-iframe" />
