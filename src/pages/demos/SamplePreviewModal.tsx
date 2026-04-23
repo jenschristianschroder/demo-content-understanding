@@ -27,17 +27,21 @@ function getFileType(path: string): 'image' | 'video' | 'audio' | 'pdf' | 'other
 
 const PdfViewer: React.FC<{ url: string }> = ({ url }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     const renderPdf = async () => {
-      const pdf = await pdfjsLib.getDocument(url).promise;
-      if (cancelled) return;
-      setPageCount(pdf.numPages);
       const container = containerRef.current;
       if (!container) return;
-      container.innerHTML = '';
+
+      const pdf = await pdfjsLib.getDocument(url).promise;
+      if (cancelled) return;
+
+      // Clear previous canvases (only DOM nodes we created, not React-managed)
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
 
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
@@ -52,15 +56,17 @@ const PdfViewer: React.FC<{ url: string }> = ({ url }) => {
         const ctx = canvas.getContext('2d')!;
         await page.render({ canvas, canvasContext: ctx, viewport }).promise;
       }
+      if (!cancelled) setLoading(false);
     };
     renderPdf();
     return () => { cancelled = true; };
   }, [url]);
 
   return (
-    <div className="pdf-viewer-container" ref={containerRef}>
-      {pageCount === 0 && <div className="demo-loading"><span className="spinner" /> Rendering PDF…</div>}
-    </div>
+    <>
+      {loading && <div className="demo-loading"><span className="spinner" /> Rendering PDF…</div>}
+      <div className="pdf-viewer-container" ref={containerRef} />
+    </>
   );
 };
 
