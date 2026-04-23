@@ -50,7 +50,7 @@ const PdfViewer: React.FC<{ url: string }> = ({ url }) => {
         canvas.height = viewport.height;
         container.appendChild(canvas);
         const ctx = canvas.getContext('2d')!;
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvas, canvasContext: ctx, viewport }).promise;
       }
     };
     renderPdf();
