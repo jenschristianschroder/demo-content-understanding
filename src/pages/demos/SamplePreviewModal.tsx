@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SamplePreviewModalProps {
   sampleFile: string;
@@ -20,6 +20,27 @@ function getFileType(path: string): 'image' | 'video' | 'audio' | 'other' {
 const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onClose }) => {
   const fileName = sampleFile.split('/').pop() || 'Sample File';
   const fileType = getFileType(sampleFile);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let revoked = false;
+    fetch(sampleFile)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load sample file');
+        return res.blob();
+      })
+      .then((blob) => {
+        if (!revoked) setBlobUrl(URL.createObjectURL(blob));
+      })
+      .catch(() => {
+        if (!revoked) setError('Could not load sample file.');
+      });
+    return () => {
+      revoked = true;
+      setBlobUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    };
+  }, [sampleFile]);
 
   return (
     <div className="sample-preview-overlay" onClick={onClose}>
@@ -29,17 +50,19 @@ const SamplePreviewModal: React.FC<SamplePreviewModalProps> = ({ sampleFile, onC
           <button className="sample-preview-close" onClick={onClose} type="button" aria-label="Close preview">✕</button>
         </div>
         <div className="sample-preview-body">
-          {fileType === 'image' && (
-            <img src={sampleFile} alt={fileName} className="sample-preview-image" />
+          {error && <div className="demo-error">{error}</div>}
+          {!blobUrl && !error && <div className="demo-loading"><span className="spinner" /> Loading preview…</div>}
+          {blobUrl && fileType === 'image' && (
+            <img src={blobUrl} alt={fileName} className="sample-preview-image" />
           )}
-          {fileType === 'video' && (
-            <video src={sampleFile} controls className="sample-preview-video">Your browser does not support video playback.</video>
+          {blobUrl && fileType === 'video' && (
+            <video src={blobUrl} controls className="sample-preview-video">Your browser does not support video playback.</video>
           )}
-          {fileType === 'audio' && (
-            <audio src={sampleFile} controls className="sample-preview-audio">Your browser does not support audio playback.</audio>
+          {blobUrl && fileType === 'audio' && (
+            <audio src={blobUrl} controls className="sample-preview-audio">Your browser does not support audio playback.</audio>
           )}
-          {fileType === 'other' && (
-            <iframe src={sampleFile} title={fileName} className="sample-preview-iframe" />
+          {blobUrl && fileType === 'other' && (
+            <iframe src={blobUrl} title={fileName} className="sample-preview-iframe" />
           )}
         </div>
       </div>
