@@ -1,4 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
+import SamplePreviewModal from './SamplePreviewModal';
 
 interface FileInputProps {
   accept: string;
@@ -10,6 +11,7 @@ const FileInput: React.FC<FileInputProps> = ({ accept, sampleFile, onFileSelecte
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleFile = useCallback((file: File) => {
     setFileName(file.name);
@@ -58,7 +60,9 @@ const FileInput: React.FC<FileInputProps> = ({ accept, sampleFile, onFileSelecte
       </div>
       <div className="demo-actions">
         <button className="btn-secondary" onClick={loadSample} type="button">Use Sample File</button>
+        <button className="btn-link" onClick={() => setShowPreview(true)} type="button">Preview Sample</button>
       </div>
+      {showPreview && <SamplePreviewModal sampleFile={sampleFile} onClose={() => setShowPreview(false)} />}
     </div>
   );
 };
